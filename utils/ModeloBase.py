@@ -12,7 +12,7 @@ class ModeloBase(ABC):
                 num_test=30, 
                 lookback=30,
                 batch_size=32,
-                epocas=10,
+                epocas=500,
                 base_dados="",
                 ts_scaled_df=None,
                 config=None,
