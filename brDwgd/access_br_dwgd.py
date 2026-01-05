@@ -51,9 +51,9 @@ def recuperar_dados_br_dwgd_com_area():
     #df = coletar_outras_informacoes_com_id("RH.npz", melhor_estacao_id, "RH", df)
     #df = coletar_outras_informacoes_com_id("Rs.npz", melhor_estacao_id, "Rs", df)
     #df = coletar_outras_informacoes_com_id("u2.npz", melhor_estacao_id, "u2", df)
-    df = df['2008-01-01': '2012-12-01']
-    #coordenadas_da_estacao = filtered_latlon[48]
-    #print(coordenadas_da_estacao)
+    df = df['2008-01-01': '2024-03-20']
+    coordenadas_da_estacao = filtered_latlon[48]
+    print(coordenadas_da_estacao)
     return df
 
 def coletar_outras_informacoes_com_id(arquivo, id_estacao, nome_coluna, df):
@@ -67,46 +67,4 @@ def coletar_outras_informacoes_com_id(arquivo, id_estacao, nome_coluna, df):
     dfProvisorio = pd.DataFrame(data=var, index=days, columns=id_station).fillna(0)
 
     df[nome_coluna] = dfProvisorio[id_estacao]
-    return df
-
-
-
-def abrir_empilhar(var_prefix, pasta="/home/pbose/tcc/dataset/"):
-    ds = xr.open_mfdataset(
-        f"{pasta}/{var_prefix}_Control_*.nc",
-        combine="by_coords", parallel=True, chunks={"time": 365}
-    )
-    print(ds)
-    # padroniza nomes comuns
-    ren = {}
-    if "latitude" in ds.coords: ren["latitude"] = "lat"
-    if "longitude" in ds.coords: ren["longitude"] = "lon"
-    if "valid_time" in ds.coords: ren["valid_time"] = "time"
-    ds = ds.rename(ren)
-
-    # identifica a variável principal
-    var = var_prefix if var_prefix in ds.data_vars else list(ds.data_vars)[0]
-    return ds, var
-
-def abrindo_NETCDF(est_id):
-    # Exemplo: abrir u2 e Rs
-    ds_u2, var_u2 = abrir_empilhar("u2")
-    ds_rs, var_rs = abrir_empilhar("Rs")
-
-    if "station" in ds_u2.dims or "station" in ds_u2.coords:
-        serie_u2 = ds_u2[var_u2].sel(station=str(est_id), drop=True)
-    elif "station_id" in ds_u2:
-        ds_u2 = ds_u2.assign_coords(station=ds_u2["station_id"].astype(str))
-        serie_u2 = ds_u2[var_u2].sel(station=str(est_id), drop=True)
-
-    if "station" in ds_rs.dims or "station" in ds_rs.coords:
-        serie_rs = ds_rs[var_rs].sel(station=str(est_id), drop=True)
-    elif "station_id" in ds_rs:
-        ds_rs = ds_rs.assign_coords(station=ds_rs["station_id"].astype(str))
-        serie_rs = ds_rs[var_rs].sel(station=str(est_id), drop=True)
-
-    # Alinha no tempo e vira DataFrame
-    df = xr.merge(
-        [serie_u2.rename("u2").to_dataset(), serie_rs.rename("Rs").to_dataset()]
-    ).to_dataframe().sort_index()
     return df

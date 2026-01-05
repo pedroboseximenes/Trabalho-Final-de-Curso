@@ -7,7 +7,7 @@ import re
 # --- CONFIGURAÇÕES ---
 # Caminho onde estão as pastas exec_0, exec_1, etc.
 # Ajuste aqui se sua pasta raiz tiver outro nome (ex: results/dataset/code_carbon)
-nome_diretorio="results_apenas_chuva"
+nome_diretorio="results_features"
 base_dados = "BRDWGD"
 #base_dados = "MERGE"
 

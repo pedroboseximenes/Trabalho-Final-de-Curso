@@ -41,13 +41,13 @@ logger.info(f"Primeiras linhas:\n{timeseries.head()}")
 # ========================================================================================
 inicio2 = time.time()
 logger.info("[FASE 2] Criando features temporais e estatísticas...")
-
 #timeseries, colunas_normalizar = criar_data_frame_chuva_br_dwgd(df=timeseries, tmax_col='Tmax', tmin_col='Tmin', W=30,wet_thr=1.0)
+#colunas_normalizar = ["chuva", "Tmax", "Tmin", "RH", "Rs", "u2" ]
 colunas_normalizar = ["chuva"]
+
 logger.info(f"Engenharia de features concluída. Total de colunas: {timeseries.shape[1]}")
 logger.info(f"Colunas criadas: {list(timeseries.columns)}")
 logger.info(f"Tempo total da Fase 2: {time.time() - inicio:.2f} segundos.")
-
 # ========================================================================================
 # FASE 3 - NORMALIZAÇÃO E DIVISÃO DE DADOS
 # ========================================================================================
@@ -65,9 +65,8 @@ ts_scaled_df = pd.DataFrame(
 )
 base_dados = "BRDWGD"
 lista_modelos = utils.criar_modelos(timeseries, colunas_normalizar, scaler, ts_scaled_df, num_test, lookback, base_dados, device)
-
 resultados_acumulados = []
-for i in range(10):
+for i in range(1):
     resultado_tmp = {}
     for index, modelo in enumerate(lista_modelos): 
         nome_arquivo_carbon = f'Exec{i}_{modelo.nome_code_carbon}_{base_dados}'       
@@ -84,7 +83,7 @@ for i in range(10):
         if(isinstance(modelo, utils.BILSTM)):
             config = result['Configuracao']
             tituloIteracao = f'Exec{i}_config{config}_{base_dados}'
-            plot.gerar_grafico_modelos(timeseries.iloc[-num_test:], resultado_tmp['ARIMA'], resultado_tmp['RANDOM_FOREST'], resultado_tmp['LSTM'], resultado_tmp['BiLSTM'], tituloIteracao, base_dados, i)
+            plot.gerar_grafico_modelos(timeseries['chuva'].iloc[-num_test:], None, None, resultado_tmp['LSTM'],  resultado_tmp['BILSTM'], tituloIteracao, base_dados, i)
             resultado_tmp['LSTM'] = []
             resultado_tmp['BiLSTM'] = []
 

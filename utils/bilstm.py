@@ -81,7 +81,7 @@ class BILSTM(ModeloBase):
 
         # desescalar chuva
         self.logger.info(f"Calculando erro para o train")
-        teste_size = len(self.timeseries) - len(train_pred) - self.lookback
+        train_size = len(self.timeseries) - len(train_pred) - self.lookback
         y_pred_mm_train, y_true_mm_train = util.desescalar_pred_generico(
             train_pred,
             self.colunas_normalizar,
@@ -89,7 +89,7 @@ class BILSTM(ModeloBase):
             ts_scaled=self.ts_scaled_df,
             timeseries=self.timeseries,
             target='chuva',
-            start=teste_size,
+            start=train_size,
             lookback=self.lookback
         )
         #y_pred_mm_train, y_true_mm_train = train_pred.squeeze(-1).detach().cpu().numpy(),  y_train.squeeze(-1).detach().cpu().numpy()
@@ -102,7 +102,7 @@ class BILSTM(ModeloBase):
         self.logger.info(" Gráficos gerados TRAIN ...")
 
         self.logger.info(f"Calculando erro para parte de teste")
-        validation_size = len(self.timeseries) - len(y_pred) - self.lookback
+        teste_size = len(self.timeseries) - len(y_pred) - self.lookback
         y_pred_mm, y_true_mm = util.desescalar_pred_generico(
             y_pred,
             self.colunas_normalizar,
@@ -110,7 +110,7 @@ class BILSTM(ModeloBase):
             ts_scaled=self.ts_scaled_df,
             timeseries=self.timeseries,
             target='chuva',
-            start=validation_size,
+            start=teste_size,
             lookback=self.lookback
         )
         #y_pred_mm, y_true_mm = y_pred.squeeze(-1).detach().cpu().numpy(),  y_test.squeeze(-1).detach().cpu().numpy()

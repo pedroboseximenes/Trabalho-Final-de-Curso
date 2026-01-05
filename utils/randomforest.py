@@ -22,7 +22,30 @@ class RandomForest(ModeloBase):
     # ---------------------------------------------------------------------
     # MÉTODOS AUXILIARES
     # ---------------------------------------------------------------------
+    def criar_janelas_multivariadas(self, X_df, y_series, window_size):
+        """
+        Transforma uma série multivariada em um problema supervisionado:
+        - X_window: [n_amostras, window_size * n_features]
+        - y_window: [n_amostras], alvo = chuva no tempo (t + 1) depois da janela
+        """
+        X_vals = X_df.values          # [T, n_features]
+        y_vals = y_series.values      # [T]
+        
+        n_total = len(X_df)
+        n_feats = X_df.shape[1]
+        n_samples = n_total - window_size
 
+        X_window = np.zeros((n_samples, window_size * n_feats), dtype=float)
+        y_window = np.zeros(n_samples, dtype=float)
+
+        for i in range(n_samples):
+            # janela de [i ... i+window_size-1]
+            janela = X_vals[i : i + window_size]          # [window_size, n_feats]
+            X_window[i, :] = janela.reshape(-1)           # flatten -> [window_size * n_feats]
+            # alvo = chuva no dia imediatamente após a janela
+            y_window[i] = y_vals[i + window_size]         # t = i+window_size
+
+        return X_window, y_window
     def _criar_janelas_univariadas(self, series, window_size):
         """
         Cria janelas [t-W, ..., t-1] -> alvo em t, usando só a série 'series'.
@@ -85,7 +108,7 @@ class RandomForest(ModeloBase):
         y = self.timeseries['chuva'].astype(float)
 
         # Cria janelas univariadas a partir da série completa
-        X_window, y_window = self._criar_janelas_univariadas(self.timeseries['chuva'], self.lookback)
+        X_window, y_window = self.criar_janelas_multivariadas(self.timeseries, y, self.lookback)
         # (n_samples, window_size)
         #X_window = X_window.squeeze(-1)
         #y_window = y_window.squeeze(-1) 
@@ -167,7 +190,8 @@ class RandomForest(ModeloBase):
 
         y_pred_mm = pred
         testY_mm = y_test_s
-
+        print(y_pred_mm)
+        print(testY_mm)
         rmse, mse , mae, csi = util.calcular_erros(logger=self.logger, dadoPrevisao=y_pred_mm, dadoReal=testY_mm)
         # ================================================================
         # FASE 7 — GRÁFICOS
